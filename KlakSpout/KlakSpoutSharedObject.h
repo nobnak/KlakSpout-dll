@@ -40,16 +40,31 @@ namespace klakspout
         {
             auto & g = Globals::get();
 
-            // A sender should unregister its name on destruction.
-			if (type_ == kSender && g.sender_names_->ReleaseSenderName(name_)) {
 
-				// Release the D3D11 resources.
-				if (d3d11_resource_) d3d11_resource_->Release();
-				if (d3d11_resource_view_) d3d11_resource_view_->Release();
+			// A sender should unregister its name on destruction.
+			if (type_ == kSender)
+				g.sender_names_->ReleaseSenderName(name_);
 
-				DEBUG_LOG("Resource released (%s).", name_);
-			}
+			// Release the D3D11 resources.
+			ReleaseTextureResource();
+			ReleaseResourceView();
+			
+			DEBUG_LOG("Resource released (%s).", name_);
         }
+
+		void ReleaseTextureResource() {
+			if (d3d11_resource_) {
+				d3d11_resource_->Release();
+				d3d11_resource_ = nullptr;
+			}
+		}
+
+		void ReleaseResourceView() {
+			if (d3d11_resource_view_) {
+				d3d11_resource_view_->Release();
+				d3d11_resource_view_ = nullptr;
+			}
+		}
 
         // Detect disconnection from the sender. Returns true on if disconnected.
         bool detectDisconnection() const
